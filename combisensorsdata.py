@@ -60,6 +60,8 @@ def calculate_sensor_status(response):
         return 1  # Engaged
     elif status_byte == b'\x00':
         return 0  # Disengaged
+    elif status_byte == b'\x02':
+        return 2  # Error
     else:
         return -1  # Invalid status
 
@@ -78,8 +80,9 @@ def process_sensor_requests():
     total_sensors = len(sensor_status)
     total_engaged = sensor_status.count(1)
     total_disengaged = sensor_status.count(0)
-    total_vacancy = total_sensors - total_engaged - total_disengaged
-    message = bytearray([0xAA, int(zone_id, 16), total_sensors] + sensor_status + [total_engaged, total_disengaged, total_vacancy, 0x55])
+    total_errors = sensor_status.count(2)
+    total_vacancy = total_disengaged
+    message = bytearray([0xAA, int(zone_id, 16), total_sensors] + sensor_status + [total_engaged, total_disengaged, total_vacancy,total_errors, 0x55])
     uart1.write(message)
 
 while True:
