@@ -50,18 +50,18 @@ import time
 
 uart = UART(2, baudrate=9600, tx=3, rx=1)
 uart1 = UART(1, baudrate=9600, tx=16, rx=17)
-sensor_requests = ['FA0101F9', 'FA0201FA']
+sensor_requests = ['FA0101F9', 'FA0201FA','FA0301FB']
 sensor_status = []
 zone_id = '01'
 
 def calculate_sensor_status(response):
     status_byte = response[2:3]
     if status_byte == b'\x01':
-        return 1  # Engaged
-    elif status_byte == b'\x00':
-        return 0  # Disengaged
+        return 1  # Engaged  01- have car means engaged
     elif status_byte == b'\x02':
-        return 2  # Error
+        return 2  # Disengaged  02- have car means engaged
+    elif status_byte == b'\x03':
+        return 3  # Error  03- means error
     else:
         return -1  # Invalid status
 
@@ -77,10 +77,11 @@ def process_sensor_requests():
                 sensor_status.append(calculate_sensor_status(response))
 
     # Construct message
+    #total_sensors = len(sensor_requests)
     total_sensors = len(sensor_status)
     total_engaged = sensor_status.count(1)
-    total_disengaged = sensor_status.count(0)
-    total_errors = sensor_status.count(2)
+    total_disengaged = sensor_status.count(2)
+    total_errors = sensor_status.count(3)
     total_vacancy = total_disengaged
     message = bytearray([0xAA, int(zone_id, 16), total_sensors] + sensor_status + [total_engaged, total_disengaged, total_vacancy,total_errors, 0x55])
     uart1.write(message)
