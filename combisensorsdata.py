@@ -43,7 +43,7 @@ while True:
 #EXAMPLE-2 isme maine is project ko aange badhaya hai aur isme two rs485 to ttl module lagaya hai. ek rs485tottl module jo hai sensor se data lega means input ki tarah kaam karega aur dusra rs485tottl module jo hai wo output ki tarah kaam karega
 #means sensor ka data kisi master controller ko send karega. so sensor se data lene ke liye humne pin 1 aur 3 ka use kiya tha aur pin 16,17 ka use humne rs485 to ttl se data ko master controller par send karne ke liye kiya hai
 #aur rs485tottl output wale me humne rs485tousb lagakar check kiya ki hume docklight me data mil rha hai ya nahi. aur hume data mil rha tha iska is protocol me. humne iske liye khud ka ek protocol banaya hai
-#AA(start frame), zone address(01), total sensor(05), 00 01 01 00 01 (Each sensor status), total engaged(03), total disengaged(02), total vacancy(02), total error(00), total no communication(00),55(End of protocol)
+#AA(start frame), zone address(01), total sensor(05), 00(sensoraddress01 status) 01(sensoraddress02 status) 01(sensoraddress03 status) 00(sensoraddress04 status) 01(sensoraddress05 status) (Each sensor status), total engaged(03), total disengaged(02), total vacancy(02), total error(00), total no communication(00),55(End of protocol)
 
 from machine import UART
 import time
