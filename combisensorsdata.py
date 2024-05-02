@@ -88,3 +88,51 @@ def process_sensor_requests():
 
 while True:
     process_sensor_requests()
+
+#EXAMPLE-3 3rd process me maine ye kaam kiya hai ki hum sabse pahle request send karenge docklight se zone controller ko. request ke taur par hum zone controller ko uski id send karenge taki ye pahle receive kare aur agr zone id match hone ke bad ye sensor ko request send karega aur udhar se response 
+# nikal kar hume docklight me send kar dega. humne python me code likh kar bhi is chiz ko test kar liya hai.
+from machine import UART
+import time
+
+uart = UART(2, baudrate=9600, tx=3, rx=1)
+uart1 = UART(1, baudrate=9600, tx=16, rx=17)
+sensor_requests = ['FA0101F9', 'FA0201FA', 'FA0301FB']
+sensor_status = []
+zone_id = b'\x01'  # Convert zone_id to a byte
+
+def calculate_sensor_status(response):
+    status_byte = response[2:3]
+    if status_byte == b'\x01':
+        return 1  # Engaged
+    elif status_byte == b'\x02':
+        return 2  # Disengaged
+    elif status_byte == b'\x03':
+        return 3  # Error
+    else:
+        return -1  # Invalid status
+
+def process_sensor_requests():
+    global sensor_status
+    sensor_status = []
+    for request in sensor_requests:
+        if request.startswith('FA'):
+            uart.write(bytes.fromhex(request))
+            time.sleep(2)
+            response = uart.read()
+            if response and response[0:1] == b'\xF5':
+                sensor_status.append(calculate_sensor_status(response))
+
+    # Construct message
+    total_sensors = len(sensor_status)
+    total_engaged = sensor_status.count(1)
+    total_disengaged = sensor_status.count(2)
+    total_errors = sensor_status.count(3)
+    total_vacancy = total_disengaged
+    message = bytearray([0xAA, int.from_bytes(zone_id, "little"), total_sensors] + sensor_status + [total_engaged, total_disengaged, total_vacancy, total_errors, 0x55])
+    uart1.write(message)
+
+# Listen for slave ID from the floor controller
+while True:
+    slave_id = uart1.read()
+    if slave_id == zone_id:
+        process_sensor_requests()
