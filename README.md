@@ -8,3 +8,15 @@ zone protocol- #AA(start frame), zone address(01), total sensor(05), 00(sensorad
 floor protocol- FF(floor communication)01(floor address) 04(total zones connected) EE(end of floor) zone 1 data AA to 55 , zone 2 data, zone3 data, zone4 data, total sensor, total engaged, total disengaged, total vacancy, total error, BB. from the master controller.
 
 master protocol- 
+
+
+
+
+
+uart pin diagram description-  actually esp32 me basically 3 uarts hote hai. humne ek image bhi rkha hai isme. actually mai jo esp32 use karta hu usme jo pin description hote hai wo P ke form me hote hai jaise p1, p2, p3 like this. so is board me p9, aur p10 nahi hote hai. lekin p16,p17 hote hai... p25 p26 hote hai aur p33 aur p32 hote hai aur bydefault rx tx pin bhi hote hai jise hum p3 aur p1 kahte hai... aur humara dusra ek board aata hai jisme humara D ke form me pin define hote hai
+
+uart = UART(2, baudrate=9600, tx=3, rx=1)
+uart1 = UART(1, baudrate=9600, tx=16, rx=17)
+#uart = UART(0, baudrate=9600, tx=9, rx=10)
+#uart3 = UART(4, baudrate=9600, tx=25, rx=26)
+#uart4 = UART(5, baudrate=9600, tx=33, rx=32)
