@@ -98,9 +98,6 @@ import time
 
 uart = UART(2, baudrate=9600, tx=3, rx=1)
 uart1 = UART(1, baudrate=9600, tx=16, rx=17)
-#uart2 = UART(3, baudrate=9600, tx=33, rx=32)
-#uart3 = UART(4, baudrate=9600, tx=25, rx=26)
-#uart4 = UART(5, baudrate=9600, tx=33, rx=32)
 sensor_requests = ['FA0101F9', 'FA0201FA', 'FA0301FB']
 sensor_status = []
 zone_id = b'\x01'  # Convert zone_id to a byte
