@@ -138,3 +138,60 @@ while True:
     slave_id = uart1.read()
     if slave_id == zone_id:
         process_sensor_requests()
+
+#EXAMPLE-4 this is my final complete zone controller code. 
+from machine import UART, Pin
+import time
+
+# Disable REPL on UART0
+import os
+os.dupterm(None, 0)
+
+# Initialize UARTs
+uart0 = UART(0, baudrate=9600, tx=Pin(33), rx=Pin(32))
+uart1 = UART(1, baudrate=9600, tx=Pin(16), rx=Pin(17))
+uart2 = UART(2, baudrate=9600, tx=Pin(3), rx=Pin(1))
+
+sensor_requests = ['FA0101F9', 'FA0201FA', 'FA0301FB']
+zone_id = '01'  # Convert zone_id to a byte
+
+def calculate_sensor_status(response):
+    status_byte = response[2:3]
+    if status_byte == b'\x01':
+        return 1  # Engaged
+    elif status_byte == b'\x02':
+        return 2  # Disengaged
+    elif status_byte == b'\x03':
+        return 3  # Error
+    else:
+        return -1  # Invalid status
+
+def process_sensor_requests():
+    sensor_status = []
+    
+    for request in sensor_requests:
+        if request.startswith('FA'):
+            uart1.write(bytes.fromhex(request))
+            time.sleep(2)
+            response = uart1.read()
+            if response and response[0:1] == b'\xF5':
+                sensor_status.append(calculate_sensor_status(response))
+
+    # Construct message
+    total_sensors = len(sensor_status)
+    total_engaged = sensor_status.count(1)
+    total_disengaged = sensor_status.count(2)
+    total_errors = sensor_status.count(3)
+    total_vacancy = total_disengaged
+    message = bytearray([0xAA, int(zone_id), total_sensors] + sensor_status + [total_engaged, total_disengaged, total_vacancy, total_errors, 0x55])
+    
+    # Print the hex data in the message
+    print(' '.join('{:02x}'.format(byte) for byte in message))
+    
+    # Write message to UART2 (pins 3, 1) and UART0 (pins 25, 26)
+    uart2.write(message)
+    uart0.write(message)
+
+# Main loop
+while True:
+    process_sensor_requests()
