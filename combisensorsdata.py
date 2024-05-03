@@ -53,21 +53,18 @@ import time
 
 uart = UART(2, baudrate=9600, tx=3, rx=1)
 uart1 = UART(1, baudrate=9600, tx=16, rx=17)
-#uart2 = UART(3, baudrate=9600, tx=33, rx=32)
-#uart3 = UART(4, baudrate=9600, tx=25, rx=26)
-#uart4 = UART(5, baudrate=9600, tx=33, rx=32)
-sensor_requests = ['FA0101F9', 'FA0201FA','FA0301FB']
+sensor_requests = ['FA0101F9', 'FA0201FA', 'FA0301FB']
 sensor_status = []
-zone_id = '01'
+zone_id = '01'  # Convert zone_id to a byte
 
 def calculate_sensor_status(response):
     status_byte = response[2:3]
     if status_byte == b'\x01':
-        return 1  # Engaged  01- have car means engaged
+        return 1  # Engaged
     elif status_byte == b'\x02':
-        return 2  # Disengaged  02- have car means engaged
+        return 2  # Disengaged
     elif status_byte == b'\x03':
-        return 3  # Error  03- means error
+        return 3  # Error
     else:
         return -1  # Invalid status
 
@@ -83,18 +80,17 @@ def process_sensor_requests():
                 sensor_status.append(calculate_sensor_status(response))
 
     # Construct message
-    #total_sensors = len(sensor_requests)
     total_sensors = len(sensor_status)
     total_engaged = sensor_status.count(1)
     total_disengaged = sensor_status.count(2)
     total_errors = sensor_status.count(3)
     total_vacancy = total_disengaged
-    message = bytearray([0xAA, int(zone_id, 16), total_sensors] + sensor_status + [total_engaged, total_disengaged, total_vacancy,total_errors, 0x55])
+    message = bytearray([0xAA, int(zone_id), total_sensors] + sensor_status + [total_engaged, total_disengaged, total_vacancy, total_errors, 0x55])
     uart1.write(message)
 
+# Listen for slave ID from the floor controller
 while True:
     process_sensor_requests()
-
 #EXAMPLE-3 3rd process me maine ye kaam kiya hai ki hum sabse pahle request send karenge docklight se zone controller ko. request ke taur par hum zone controller ko uski id send karenge taki ye pahle receive kare aur agr zone id match hone ke bad ye sensor ko request send karega aur udhar se response 
 # nikal kar hume docklight me send kar dega. humne python me code likh kar bhi is chiz ko test kar liya hai.
 from machine import UART
